@@ -1,0 +1,10 @@
+[package]
+name = "rust_openssl_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sha2 = "0.10.6"
+futures = "0.3"
+tokio = { version = "1.23.0", features = ["full"] }
+crypto-common = "0.1.6"
