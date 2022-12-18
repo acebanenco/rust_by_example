@@ -18,7 +18,7 @@ fn main() {
     println!("Guess the number!");
 
     let mut guess_min = 1;
-    let mut guess_max = 1000;
+    let mut guess_max = 20;
 
     let max_attempts = ((guess_max - guess_min + 1) as f64).log2().ceil() as u32;
 

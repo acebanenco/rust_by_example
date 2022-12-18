@@ -7,8 +7,7 @@ import java.util.stream.IntStream;
 
 // from https://blog.frankel.ch/start-rust/7/
 public class RustFromJavaApp {
-
-    private static final int batchSize = 100_000;
+    private static final int batchSize = Integer.getInteger("batch_size", 10_000);
     private static final ConcurrentLinkedQueue<MdContext> initializedContexts = new ConcurrentLinkedQueue<>();
 
     private static MdContext newMdContext() {
@@ -20,8 +19,8 @@ public class RustFromJavaApp {
     }
 
     private static MdContext getMdContext() {
-        return MdContext.create();
-//        return MdContext.createNative();
+//        return MdContext.create();
+        return MdContext.createNative();
     }
 
     public static void main(String[] args) {
@@ -34,7 +33,9 @@ public class RustFromJavaApp {
 
         LongAdder longAdder = new LongAdder();
 
-        IntStream.range(0, 100_000_000 / batchSize)
+        Integer rangeFrom = Integer.getInteger("range_from", 0);
+        Integer rangeTo = Integer.getInteger("range_to", 100_000);
+        IntStream.range(rangeFrom, rangeTo / batchSize)
                 .parallel()
                 .forEach(batch -> {
                     int from = batch * batchSize;
@@ -57,16 +58,16 @@ public class RustFromJavaApp {
         ByteBuffer digest = ctx.digest;
 
         int msgSize = 4;
-//        writeMessages(from, len, message, msgSize);
+        writeMessages(from, len, message, msgSize);
 
         ctx.md.digestAll(message, msgSize, digest, len);
 
         int dgstSize = 32;
         int count = 0;
         for (int i = 0; i < len; i++) {
-//            if (digest.get(i * dgstSize) == 0) {
-//                count++;
-//            }
+            if (digest.get(i * dgstSize) == 0) {
+                count++;
+            }
         }
         return count;
     }
@@ -78,10 +79,7 @@ public class RustFromJavaApp {
         }
     }
 
-
-
-    private static class MdContext {
-//        private final MessageDigestSha256 md = new NativeMessageDigestSha256Impl();
+    private static class MdContext implements AutoCloseable {
         private final MessageDigestSha256 md;
         private final ByteBuffer message;
         private final ByteBuffer digest;
@@ -106,6 +104,13 @@ public class RustFromJavaApp {
                     ByteBuffer.allocateDirect(batchSize * 4),
                     ByteBuffer.allocateDirect(batchSize * 32)
             );
+        }
+
+        @Override
+        public void close() throws Exception {
+            if ( md instanceof AutoCloseable ac ) {
+                ac.close();
+            }
         }
     }
 

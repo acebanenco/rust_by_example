@@ -8,3 +8,4 @@ sha2 = "0.10.6"
 futures = "0.3"
 tokio = { version = "1.23.0", features = ["full"] }
 crypto-common = "0.1.6"
+rust_sha256_lib = { path = "../rust_sha256_lib" }

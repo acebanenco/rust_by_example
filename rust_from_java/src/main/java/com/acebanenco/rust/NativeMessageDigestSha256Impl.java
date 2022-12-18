@@ -2,33 +2,37 @@ package com.acebanenco.rust;
 
 import java.nio.ByteBuffer;
 
-public class NativeMessageDigestSha256Impl implements MessageDigestSha256 {
+public class NativeMessageDigestSha256Impl implements MessageDigestSha256, AutoCloseable {
 
     static {
-        System.loadLibrary("rust_openssl_lib");
+        System.loadLibrary("rust_sha256_lib");
     }
 
-    private final long md;
-    private final long context;
+    private final long hasher;
 
     public NativeMessageDigestSha256Impl() {
-        this.md = md_init();
-        this.context = init(md);
+        this.hasher = sha256_hasher_init();
+    }
+
+    @Override
+    public void close() {
+        free(hasher);
     }
 
     @Override
     public void digestAll(ByteBuffer messages, int messageSize, ByteBuffer digests, int len) {
-        digest_multi(md, context, messages, messageSize, digests, len);
+        digestAll(hasher, messages, messageSize, digests, len);
     }
 
-    private static native long init(long md);
+    private static native long sha256_hasher_init();
 
-    private static native long md_init();
+    private static native void free(long hasher);
 
-    private static native void digest_multi(long md, long context, ByteBuffer input, int inputSize, ByteBuffer output, int len);
-
-    private static native void free(long context);
-
-    private static native void md_free(long context);
+    private static native void digestAll(
+            long hasher,
+            ByteBuffer inputChunks,
+            int inputChunkSize,
+            ByteBuffer outputChunks,
+            int numberOfChunks);
 
 }

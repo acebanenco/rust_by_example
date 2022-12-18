@@ -1,0 +1,14 @@
+[package]
+name = "rust_sha256_lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jni = "0.20.0"
+sha2 = "0.10.6"
+crypto-common = "0.1.6"
+
+[lib]
+crate-type = ["cdylib"]
+name = "rust_sha256_lib"
+path = "src/lib.rs"
